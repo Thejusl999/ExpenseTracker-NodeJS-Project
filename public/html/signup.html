@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="/css/main.css" />
+  </head>
+  <body>
+    <div class="auth">
+      <h1>SignUp</h1>
+      <form id="form">
+        <div class="control">
+          <label for="name">Name</label>
+          <input id="name" type="text" required />
+        </div>
+        <div class="control">
+          <label for="email">Email</label>
+          <input id="email" type="email" required />
+        </div>
+        <div class="control">
+          <label for="password">Password</label>
+          <input id="password" type="password" required />
+        </div>
+        <div class="actions">
+          <button>Sign up</button>
+        </div>
+      </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+      const form = document.querySelector("#form");
+      const nameInp = document.querySelector("#name");
+      const emailInp = document.querySelector("#email");
+      const passwordInp = document.querySelector("#password");
+
+      form.addEventListener("submit", addUser);
+      function addUser(e) {
+        e.preventDefault();
+        let name = nameInp.value;
+        let email = emailInp.value;
+        let password = passwordInp.value;
+        let obj = {
+          name,
+          email,
+          password
+        };
+        axios
+          .post("http://localhost:3000/user/signup", obj)
+          .then((response) => {
+            alert(`Logged in successfully!`);
+          })
+          .catch((err) => console.log(err));
+        nameInp.value = "";
+        emailInp.value = "";
+        passwordInp.value = "";
+      }
+    </script>
+  </body>
+</html>
