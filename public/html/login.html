@@ -9,12 +9,8 @@
   </head>
   <body>
     <div class="auth">
-      <h1>SignUp</h1>
+      <h1>Login</h1>
       <form id="form">
-        <div class="control">
-          <label for="name">Name</label>
-          <input id="name" type="text" required />
-        </div>
         <div class="control">
           <label for="email">Email</label>
           <input id="email" type="email" required />
@@ -24,48 +20,42 @@
           <input id="password" type="password" required />
         </div>
         <div class="actions">
-          <button>Sign up</button>
+          <button>Login</button>
         </div>
       </form>
       <div class='loginActions'>
-        <button onclick="showLoginPage()">Already have an account? Login</button>
+        <button onclick="showSignupPage()">Don't have an account? Sign up</button>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
       const form = document.querySelector("#form");
-      const nameInp = document.querySelector("#name");
       const emailInp = document.querySelector("#email");
       const passwordInp = document.querySelector("#password");
 
       form.addEventListener("submit", addUser);
       function addUser(e) {
         e.preventDefault();
-        let name = nameInp.value;
         let email = emailInp.value;
         let password = passwordInp.value;
         let obj = {
-          name,
           email,
           password
         };
         axios
-          .post("http://localhost:3000/user/signup", obj)
+          .post("http://localhost:3000/user/login", obj)
           .then((response) => {
-            alert(`User signed up successfully!`);
-            window.location.href="http://localhost:3000/user/login";
+            alert(response.data.response);
+            emailInp.value = "";
+            passwordInp.value = "";
           })
           .catch((err) => {
-            alert(`User already exists!`);
-            window.location.href="http://localhost:3000/user/login";
+            alert(err.response.data.error);
           });
-        nameInp.value = "";
-        emailInp.value = "";
-        passwordInp.value = "";
       }
 
-      function showLoginPage(){
-        window.location.href="http://localhost:3000/user/login";
+      function showSignupPage(){
+        window.location.href="http://localhost:3000/user/signup";
       }
     </script>
   </body>
