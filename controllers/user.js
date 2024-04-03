@@ -11,7 +11,11 @@ exports.addUser = async (req,res,next)=>{
         .then(result=>{
             res.status(200).json(newUser);
         })
-        .catch(err=>console.log(err));
+        .catch(err=>{
+           if(err.original.code==='ER_DUP_ENTRY'){
+            res.status(403).json({error:err.original.code});
+           }
+        });
 };
 
 exports.connectFrontend = async(req, res) => {
