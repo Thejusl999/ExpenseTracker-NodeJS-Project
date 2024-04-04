@@ -1,11 +1,11 @@
 const express=require('express');
 const router=express.Router();
 
-const playerController=require('../controllers/user');
+const userController=require('../controllers/user');
 
-router.get('/user/signup',playerController.connectSignup);
-router.post('/user/signup',playerController.signupUser);
-router.get('/user/login',playerController.connectLogin);
-router.post('/user/login',playerController.loginUser);
+router.get('/user/signup',userController.connectSignup);
+router.post('/user/signup',userController.signupUser);
+router.get('/user/login',userController.connectLogin);
+router.post('/user/login',userController.loginUser);
 
 module.exports=router;

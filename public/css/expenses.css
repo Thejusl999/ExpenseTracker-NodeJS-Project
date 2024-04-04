@@ -1,0 +1,25 @@
+.form{
+    font-weight:bold;
+    text-align: center;
+    border:1px solid black;
+    border-radius: 10px;
+    font-family: times new roman;
+    font-size: 18px;
+    padding:10px;
+    margin:3rem auto;
+    background-color: tan;
+    pointer-events: all;
+}
+
+#expenses{
+    text-align: start;
+}
+
+.deletebtn.delete {
+    font-size: 15px;
+    padding: 5px;
+    background: red;
+    border: 1px solid black;
+    border-radius: 5px;
+    float: right;
+  }

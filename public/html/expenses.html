@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="/css/expenses.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="col-12">
+      <h6 style="text-align: start; margin-top: 5px; margin-left: 10px">
+        <i>Welcome to Expense Tracker !!!</i>
+      </h6>
+    </div>
+    <div
+      style="
+        border: none;
+        background-color: black;
+        height: 1px;
+        margin-top: 2px;
+      "
+    ></div>
+    <div class="container">
+      <form id="form" class="form">
+        <div class="row">
+          <div class="col-4">
+            <label for="expense" class="form-label">Expense Amount</label>
+            <input id="expense" type="number" class="form-control" required />
+          </div>
+          <div class="col-4">
+            <label for="description" class="form-label">Description</label>
+            <input id="description" type="text" class="form-control" required />
+          </div>
+          <div class="col-4">
+            <label for="category" class="form-label">Category</label>
+            <select id="category" class="form-select">
+              <option value="" required disabled selected>Select</option>
+              <option value="FOOD">FOOD</option>
+              <option value="FUEL">FUEL</option>
+              <option value="GROCERIES">GROCERIES</option>
+              <option value="TRAVEL">TRAVEL</option>
+            </select>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <button type="submit" class="btn btn-dark">ADD EXPENSE</button>
+          </div>
+        </div>
+      </form>
+      <div class="container form">
+        <h3>EXPENSES</h3>
+        <ul id="expenses"></ul>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+    <script>
+      const form = document.querySelector("#form");
+      const itemList = document.querySelector("#expenses");
+      const expenseamtInp = document.querySelector("#expense");
+      const descriptionInp = document.querySelector("#description");
+      const categoryInp = document.querySelector("#category");
+      form.addEventListener("submit", addItem);
+      function addItem(e) {
+        e.preventDefault();
+        if (
+          expenseamtInp.value === "" ||
+          descriptionInp.value === "" ||
+          categoryInp.value === ""
+        ) {
+          alert("Fill all inputs!");
+        } else {
+          let amount = expenseamtInp.value;
+          let description = descriptionInp.value;
+          let category = categoryInp.value;
+          let obj = {
+            amount,
+            description,
+            category,
+          };
+          axios
+            .post("http://localhost:3000/expenses/addExpense", obj)
+            .then((response) => {
+              showExpense(response.data);
+            })
+            .catch((err) => console.log(err));
+          expenseamtInp.value = "";
+          descriptionInp.value = "";
+          categoryInp.value = "";
+        }
+      }
+
+      function showExpense(obj) {
+        let newLi = document.createElement("li");
+        newLi.className = "item";
+        let details = `${obj.amount}-${obj.description}-${obj.category}`;
+        newLi.appendChild(document.createTextNode(details));
+        let delBtn = document.createElement("button");
+        delBtn.className = "deletebtn delete";
+        delBtn.appendChild(document.createTextNode("DELETE"));
+        newLi.appendChild(delBtn);
+        itemList.appendChild(newLi);
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        axios
+          .get("http://localhost:3000/expenses/getExpenses")
+          .then((response) => {
+            for (let i = 0; i < response.data.length; i++) {
+              showExpense(response.data[i]);
+            }
+          })
+          .catch((err) => console.log(err));
+      });
+
+      itemList.addEventListener("click", deleteItem);
+      function deleteItem(e) {
+        if (e.target.classList.contains("delete")) {
+          if (confirm('Click on "OK" to Delete Item')) {
+            itemList.removeChild(e.target.parentElement);
+            let elementToDelete =
+              e.target.parentElement.textContent.split("-")[1];
+              axios.get("http://localhost:3000/expenses/getExpenses").then((response) => {
+                for (let i = 0; i < response.data.length; i++) {
+                  if (response.data[i].description === elementToDelete) {
+                    let deletedUser = response.data[i].description;
+                    axios
+                      .delete(
+                        "http://localhost:3000/deleteExpense/" +
+                          response.data[i].id
+                      )
+                      .then((response) =>
+                        console.log(deletedUser, "has been removed!")
+                      )
+                      .catch((err) => console.log(err));
+                  }
+                }
+            });
+          }
+        }
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
