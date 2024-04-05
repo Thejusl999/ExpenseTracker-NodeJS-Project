@@ -1,6 +1,8 @@
 const path = require("path");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jsonwebtoken=require("jsonwebtoken");
+const secretKey=require("../util/secretKey");
 
 exports.signupUser = async (req, res, next) => {
   const newUser = {
@@ -27,6 +29,11 @@ exports.connectSignup = async (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "html", "signup.html"));
 };
 
+
+function generateToken(id,name){
+  return jsonwebtoken.sign({userId:id,username:name},secretKey);
+}
+
 exports.loginUser = async (req, res, next) => {
   const fetchedUser = {
     email: req.body.email,
@@ -46,7 +53,7 @@ exports.loginUser = async (req, res, next) => {
               if (result === true) {
                 return res
                   .status(200)
-                  .json({ response: "User logged in successfully!" });
+                  .json({ message: "User logged in successfully!",token:generateToken(user[0].id,user[0].name)});
               } else {
                 return res
                   .status(401)

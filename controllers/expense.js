@@ -1,5 +1,5 @@
 const path = require("path");
-const User = require("../models/Expense");
+const Expense = require("../models/Expense");
 
 exports.connectExpenses = async (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "html", "expenses.html"));
@@ -9,9 +9,10 @@ exports.addExpense = async (req,res,next)=>{
   const newExpense={
       amount:req.body.amount,
       description:req.body.description,
-      category:req.body.category
+      category:req.body.category,
+      userId:req.user.id
   }
-  User.create(newExpense)
+  Expense.create(newExpense)
       .then(result=>{
           res.status(200).json(newExpense);
       })
@@ -19,13 +20,13 @@ exports.addExpense = async (req,res,next)=>{
 };
 
 exports.getExpenses = async (req,res,next)=>{
-  const expenses=await User.findAll()
+  const expenses=await Expense.findAll({where:{userId:req.user.id}})
   res.status(200).json(expenses);
 };
 
 exports.deleteExpense = async (req,res,next)=>{
   const expenseId=req.params.expenseId;
-  User.findByPk(expenseId)
+  Expense.findByPk(expenseId)
       .then(product=>{
           product.destroy();
       })

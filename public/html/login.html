@@ -45,7 +45,9 @@
         axios
           .post("http://localhost:3000/user/login", obj)
           .then((response) => {
-            alert(response.data.response);
+            alert(response.data.message);
+            localStorage.setItem('token',response.data.token);
+            window.location.href="http://localhost:3000/expenses";
             emailInp.value = "";
             passwordInp.value = "";
           })

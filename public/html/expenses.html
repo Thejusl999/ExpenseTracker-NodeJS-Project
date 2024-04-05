@@ -83,8 +83,9 @@
             description,
             category,
           };
+          const token=localStorage.getItem('token');
           axios
-            .post("http://localhost:3000/expenses/addExpense", obj)
+            .post("http://localhost:3000/expenses/addExpense", obj,{headers:{'Authorization':token}})
             .then((response) => {
               showExpense(response.data);
             })
@@ -108,8 +109,9 @@
       }
 
       window.addEventListener("DOMContentLoaded", () => {
+        const token=localStorage.getItem('token');
         axios
-          .get("http://localhost:3000/expenses/getExpenses")
+          .get("http://localhost:3000/expenses/getExpenses",{headers:{'Authorization':token}})
           .then((response) => {
             for (let i = 0; i < response.data.length; i++) {
               showExpense(response.data[i]);
@@ -125,7 +127,8 @@
             itemList.removeChild(e.target.parentElement);
             let elementToDelete =
               e.target.parentElement.textContent.split("-")[1];
-              axios.get("http://localhost:3000/expenses/getExpenses").then((response) => {
+              const token=localStorage.getItem('token');
+              axios.get("http://localhost:3000/expenses/getExpenses",{headers:{'Authorization':token}}).then((response) => {
                 for (let i = 0; i < response.data.length; i++) {
                   if (response.data[i].description === elementToDelete) {
                     let deletedUser = response.data[i].description;
