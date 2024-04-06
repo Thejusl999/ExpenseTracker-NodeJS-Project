@@ -53,7 +53,7 @@ exports.loginUser = async (req, res, next) => {
               if (result === true) {
                 return res
                   .status(200)
-                  .json({ message: "User logged in successfully!",token:generateToken(user[0].id,user[0].name)});
+                  .json({ message: "User logged in successfully!",token:generateToken(user[0].id,user[0].name),isPremium:user[0].isPremium});
               } else {
                 return res
                   .status(401)
