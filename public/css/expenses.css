@@ -10,8 +10,25 @@
     background-color: tan;
     pointer-events: all;
 }
+.form1{
+    font-weight:bold;
+    text-align: center;
+    border:1px solid black;
+    border-radius: 10px;
+    font-family: times new roman;
+    font-size: 18px;
+    padding:10px;
+    margin:3rem auto;
+    background-color: tan;
+    pointer-events: all;
+    padding-bottom: 0px;
+}
 
 #expenses{
+    text-align: start;
+}
+
+#leaderboard{
     text-align: start;
 }
 

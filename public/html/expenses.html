@@ -16,6 +16,16 @@
       <div class="col text-start mt-2 ms-1 py-1">
         <h6><i>Welcome to Expense Tracker !!!</i></h6>
       </div>
+      <div class="col text-center mt-1 py-1">
+        <button
+          id="leaderboardBtn"
+          class="btn btn-success btn-sm"
+          style="display: none"
+          onclick="showLeaderboard(event)"
+        >
+          SHOW LEADERBOARD
+        </button>
+      </div>
       <div class="col text-end me-1 py-1">
         <button
           id="premiumBtn"
@@ -26,14 +36,8 @@
         </button>
       </div>
     </div>
-    <div
-    style="
-      border: none;
-      background-color: black;
-      height: 1px;
-    "
-  ></div>
-    </div>
+    <div style="border: none; background-color: black; height: 1px"></div>
+
     <div class="container">
       <form id="form" class="form">
         <div class="row">
@@ -62,24 +66,36 @@
           </div>
         </div>
       </form>
-      <div class="container form">
+      <div id="expensesDiv" class="container form1" style="display: none">
         <h3>EXPENSES</h3>
         <ul id="expenses"></ul>
+      </div>
+      <div id="leaderboardDiv" class="container form1" style="display: none">
+        <h3>LEADERBOARD</h3>
+        <ul id="leaderboard"></ul>
       </div>
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
       const isPremium = localStorage.getItem("isPremium");
-      if (isPremium !== 'null') {
-        document.getElementById("premiumBtn").style.display = "none";
+      if (isPremium !== "null") {
+        // document.getElementById("premiumBtn").style.display = "none";
+        document.getElementById("premiumBtn").textContent =
+          "You are a Premium User";
+        document.getElementById("premiumBtn").onclick = null;
+        document.getElementById("premiumBtn").style.cursor = "not-allowed";
+        document.getElementById("leaderboardBtn").style.display = "inline";
       }
 
       const form = document.querySelector("#form");
-      const itemList = document.querySelector("#expenses");
       const expenseamtInp = document.querySelector("#expense");
       const descriptionInp = document.querySelector("#description");
       const categoryInp = document.querySelector("#category");
+
+      const expenseList = document.querySelector("#expenses");
+      const leaderboardList = document.querySelector("#leaderboard");
+
       form.addEventListener("submit", addItem);
       function addItem(e) {
         e.preventDefault();
@@ -105,6 +121,9 @@
             })
             .then((response) => {
               showExpense(response.data);
+              if (expenseList.childElementCount > 0) {
+                document.getElementById("expensesDiv").style.display = "block";
+              }
             })
             .catch((err) => console.log(err));
           expenseamtInp.value = "";
@@ -122,7 +141,7 @@
         delBtn.className = "deletebtn delete";
         delBtn.appendChild(document.createTextNode("DELETE"));
         newLi.appendChild(delBtn);
-        itemList.appendChild(newLi);
+        expenseList.appendChild(newLi);
       }
 
       window.addEventListener("DOMContentLoaded", () => {
@@ -134,17 +153,19 @@
           .then((response) => {
             for (let i = 0; i < response.data.length; i++) {
               showExpense(response.data[i]);
+              if (expenseList.childElementCount > 0) {
+                document.getElementById("expensesDiv").style.display = "block";
+              }
             }
           })
           .catch((err) => console.log(err));
-        
       });
 
-      itemList.addEventListener("click", deleteItem);
+      expenseList.addEventListener("click", deleteItem);
       function deleteItem(e) {
         if (e.target.classList.contains("delete")) {
           if (confirm('Click on "OK" to Delete Item')) {
-            itemList.removeChild(e.target.parentElement);
+            expenseList.removeChild(e.target.parentElement);
             let elementToDelete =
               e.target.parentElement.textContent.split("-")[1];
             const token = localStorage.getItem("token");
@@ -197,7 +218,14 @@
                   .then((result) => {
                     alert("You are now a Premium User!");
                     localStorage.setItem("isPremium", true);
-                    document.getElementById('premiumBtn').style.display='none';
+                    // document.getElementById('premiumBtn').style.display='none';
+                    document.getElementById("premiumBtn").textContent =
+                      "You are a Premium User";
+                    document.getElementById("premiumBtn").onclick = null;
+                    document.getElementById("premiumBtn").style.cursor =
+                      "not-allowed";
+                    document.getElementById("leaderboardBtn").style.display =
+                      "inline";
                   })
                   .catch((err) => {
                     alert("Something went wrong. Please retry!");
@@ -208,25 +236,50 @@
             razorpayUI.open();
             razorpayUI.on("payment.failed", (response) => {
               axios
-                  .post(
-                    "http://localhost:3000/premium/updateStatus",
-                    {
-                      order_id: options.order_id,
-                      payment_id: response.razorpay_payment_id,
-                      status:'FAILED'
-                    },
-                    { headers: { 'Authorization': token } }
-                  )
-                  .then((result) => {
-                    console.log('Transaction Failed. Please retry!');
-                  })
-                  .catch((err) => {
-                    alert(err.response.data.message);
-                  });
+                .post(
+                  "http://localhost:3000/premium/updateStatus",
+                  {
+                    order_id: options.order_id,
+                    payment_id: response.razorpay_payment_id,
+                    status:'FAILED'
+                  },
+                  { headers: { 'Authorization': token } }
+                )
+                .then((result) => {
+                  console.log('Transaction Failed. Please retry!');
+                })
+                .catch((err) => {
+                  alert(err.response.data.message);
+                });
             });
           })
           .catch((err) => {
             alert("Transaction Failed!");
+          });
+      }
+
+      function showLeaderboard(e) {
+        const token = localStorage.getItem("token");
+        document.getElementById("leaderboardDiv").style.display = "block";
+        document.getElementById("leaderboardBtn").textContent =
+          "UPDATE LEADERBOARD";
+        axios
+          .get("http://localhost:3000/premium/showLeaderboard", {
+            headers: { 'Authorization': token },
+          })
+          .then((response) => {
+            while (leaderboardList.firstChild) {
+              leaderboardList.removeChild(leaderboardList.firstChild);
+            }
+            response.data.expenses.forEach((expense) => {
+              const li = document.createElement("li");
+              let details = `Name-${expense.name} Total Expense-${expense.total}`;
+              li.appendChild(document.createTextNode(details));
+              leaderboardList.appendChild(li);
+            });
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }
     </script>

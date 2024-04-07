@@ -1,5 +1,7 @@
 const Razorpay = require("razorpay");
 const Order = require("../models/Order");
+const Expense=require('../models/Expense');
+const User=require('../models/User');
 
 exports.buyPremium = (req, res) => {
   const razorpay = new Razorpay({
@@ -49,4 +51,35 @@ exports.updateStatus = (req, res) => {
         .status(500)
         .json({ success: false, error: "Internal Server Error!" });
     });
+};
+
+exports.showLeaderboard=(req,res)=>{
+  Expense.findAll()
+    .then(async(expenses)=>{
+      const promise=expenses.map(expense=>{
+        return User.findByPk(expense.userId)
+          .then(response=>{
+            expense={...expense.dataValues,name:response.name};
+            return expense;
+          });
+      });
+      const modifiedExpenses=await Promise.all(promise);
+      let expSet=new Set();
+      const final=modifiedExpenses.map(expense=>{
+        if (!expSet.has(expense.name)) {
+          expense.total = Number(expense.amount);
+          expSet.add(expense.name);
+        } else {
+          const existingExpense = modifiedExpenses.find(exp => exp.name === expense.name);
+          existingExpense.total += Number(expense.amount);
+          return null;
+        }
+        return expense;
+      });
+      const FinalExpenses=await Promise.all(final);
+      return res.status(200).json({ expenses:FinalExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
+    })
+    .catch(err=>{
+      console.log(err)
+    })
 };
