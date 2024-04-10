@@ -271,9 +271,12 @@
             while (leaderboardList.firstChild) {
               leaderboardList.removeChild(leaderboardList.firstChild);
             }
-            response.data.expenses.forEach((expense) => {
+            // response.data.expenses.forEach((expense) => {    // before optimization
+            // after optimization
+            response.data.forEach((expense) => {
               const li = document.createElement("li");
-              let details = `Name-${expense.name} Total Expense-${expense.total}`;
+              let total=expense.total===null?0:expense.total;
+              let details = `Name-${expense.name} Total Expense-${total}`;
               li.appendChild(document.createTextNode(details));
               leaderboardList.appendChild(li);
             });

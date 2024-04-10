@@ -2,6 +2,7 @@ const Razorpay = require("razorpay");
 const Order = require("../models/Order");
 const Expense=require('../models/Expense');
 const User=require('../models/User');
+const sequelize = require("../util/database");
 
 exports.buyPremium = (req, res) => {
   const razorpay = new Razorpay({
@@ -54,16 +55,22 @@ exports.updateStatus = (req, res) => {
 };
 
 exports.showLeaderboard=(req,res)=>{
-  Expense.findAll()
+  // 1) Expense.findAll()                                    // bruteforce-optimized
+  // 2) Expense.findAll({attributes:['userId','amount']})    // optimizing using attributes
+  
+  // 3) optimizing using sequelize.fn and adding column 'total'
+  /* Expense.findAll({attributes:['userId',[sequelize.fn('sum',sequelize.col('amount')),'total']],group:['userId']})
     .then(async(expenses)=>{
       const promise=expenses.map(expense=>{
-        return User.findByPk(expense.userId)
+        return User.findByPk(expense.userId,{attributes:['id','name']})
           .then(response=>{
             expense={...expense.dataValues,name:response.name};
             return expense;
           });
       });
       const modifiedExpenses=await Promise.all(promise);
+      
+      // bruteforce-optimized (removed after optimizing using sequelize.fn and adding column 'total')
       let expSet=new Set();
       const final=modifiedExpenses.map(expense=>{
         if (!expSet.has(expense.name)) {
@@ -76,8 +83,26 @@ exports.showLeaderboard=(req,res)=>{
         }
         return expense;
       });
-      const FinalExpenses=await Promise.all(final);
-      return res.status(200).json({ expenses:FinalExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
+      const finalExpenses=await Promise.all(final);
+      return res.status(200).json({ expenses:finalExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
+
+      return res.status(200).json({ expenses:modifiedExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
+    }) */
+
+    // 4) using joins to join User Model and Expense Model
+    User.findAll({
+      attributes:['id','name',[sequelize.fn('sum',sequelize.col('amount')),'total']],
+      include:[
+        {
+          model:Expense,
+          attributes:[]
+        }
+      ],
+      group:['user.id'],
+      order:[['total','DESC']]
+    })
+    .then(response=>{
+      return res.status(200).json(response);
     })
     .catch(err=>{
       console.log(err)
