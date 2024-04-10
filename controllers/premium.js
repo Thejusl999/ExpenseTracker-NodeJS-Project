@@ -55,51 +55,9 @@ exports.updateStatus = (req, res) => {
 };
 
 exports.showLeaderboard=(req,res)=>{
-  // 1) Expense.findAll()                                    // bruteforce-optimized
-  // 2) Expense.findAll({attributes:['userId','amount']})    // optimizing using attributes
-  
-  // 3) optimizing using sequelize.fn and adding column 'total'
-  /* Expense.findAll({attributes:['userId',[sequelize.fn('sum',sequelize.col('amount')),'total']],group:['userId']})
-    .then(async(expenses)=>{
-      const promise=expenses.map(expense=>{
-        return User.findByPk(expense.userId,{attributes:['id','name']})
-          .then(response=>{
-            expense={...expense.dataValues,name:response.name};
-            return expense;
-          });
-      });
-      const modifiedExpenses=await Promise.all(promise);
-      
-      // bruteforce-optimized (removed after optimizing using sequelize.fn and adding column 'total')
-      let expSet=new Set();
-      const final=modifiedExpenses.map(expense=>{
-        if (!expSet.has(expense.name)) {
-          expense.total = Number(expense.amount);
-          expSet.add(expense.name);
-        } else {
-          const existingExpense = modifiedExpenses.find(exp => exp.name === expense.name);
-          existingExpense.total += Number(expense.amount);
-          return null;
-        }
-        return expense;
-      });
-      const finalExpenses=await Promise.all(final);
-      return res.status(200).json({ expenses:finalExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
-
-      return res.status(200).json({ expenses:modifiedExpenses.filter(expense=>expense!==null).sort((a,b)=>b.total-a.total) });
-    }) */
-
-    // 4) using joins to join User Model and Expense Model
     User.findAll({
-      attributes:['id','name',[sequelize.fn('sum',sequelize.col('amount')),'total']],
-      include:[
-        {
-          model:Expense,
-          attributes:[]
-        }
-      ],
-      group:['user.id'],
-      order:[['total','DESC']]
+      attributes:['name','totalExpense'],
+      order:[['totalExpense','DESC']]
     })
     .then(response=>{
       return res.status(200).json(response);

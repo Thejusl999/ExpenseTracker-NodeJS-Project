@@ -80,7 +80,6 @@
     <script>
       const isPremium = localStorage.getItem("isPremium");
       if (isPremium !== "null") {
-        // document.getElementById("premiumBtn").style.display = "none";
         document.getElementById("premiumBtn").textContent =
           "You are a Premium User";
         document.getElementById("premiumBtn").onclick = null;
@@ -182,9 +181,13 @@
                         "http://localhost:3000/deleteExpense/" +
                           response.data[i].id
                       )
-                      .then((response) =>
-                        console.log(deletedUser, "has been removed!")
-                      )
+                      .then((response) => {
+                        console.log(deletedUser, "has been removed!");
+                        if (expenseList.childElementCount === 0) {
+                          document.getElementById("expensesDiv").style.display =
+                            "none";
+                        }
+                      })
                       .catch((err) => console.log(err));
                   }
                 }
@@ -218,7 +221,6 @@
                   .then((result) => {
                     alert("You are now a Premium User!");
                     localStorage.setItem("isPremium", true);
-                    // document.getElementById('premiumBtn').style.display='none';
                     document.getElementById("premiumBtn").textContent =
                       "You are a Premium User";
                     document.getElementById("premiumBtn").onclick = null;
@@ -271,11 +273,10 @@
             while (leaderboardList.firstChild) {
               leaderboardList.removeChild(leaderboardList.firstChild);
             }
-            // response.data.expenses.forEach((expense) => {    // before optimization
-            // after optimization
             response.data.forEach((expense) => {
               const li = document.createElement("li");
-              let total=expense.total===null?0:expense.total;
+              let total =
+                expense.totalExpense === null ? 0 : expense.totalExpense;
               let details = `Name-${expense.name} Total Expense-${total}`;
               li.appendChild(document.createTextNode(details));
               leaderboardList.appendChild(li);
