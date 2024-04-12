@@ -2,19 +2,20 @@ const jsonwebtoken=require("jsonwebtoken");
 const User=require("../models/User");
 const secretKey=require('../util/secretKey');
 
-const authenticate=(req,res,next)=>{
+const authenticate=async(req,res,next)=>{
     try{
         const token=req.header('Authorization');
         const user=jsonwebtoken.verify(token,secretKey);
-        User.findByPk(user.userId)
-            .then(user=>{
-                req.user=user;
-                next();
-            })
+        const userData=await User.findByPk(user.userId);
+        if(userData){
+            req.user=userData;
+            next();
+        }else{
+            return res.status(401).json({success:false,message:'User not found'});
+        }
     }
     catch(err){
-        console.log(err);
-        return res.status(401).json({success:true});
+        return res.status(401).json({success:false,message:'User not found'});
     }
 }
 

@@ -1,35 +1,38 @@
 const path = require("path");
 const User = require("../models/User");
 const Expense = require("../models/Expense");
+const sequelize = require("../util/database");
 
 exports.connectExpenses = async (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "html", "expenses.html"));
 };
 
 exports.addExpense = async (req, res, next) => {
-  User.findOne({ where: { id: req.user.id } })
-    .then((user) => {
-      if (user.dataValues.totalExpense === null) {
-        user.update({ totalExpense: Number(req.body.amount) });
-      } else {
-        user.update({
-          totalExpense: user.dataValues.totalExpense + Number(req.body.amount),
-        });
-      }
-      req.user.update({ totalExpense: user.dataValues.totalExpense });
-    })
-    .catch((err) => console.log(err));
+  const transact = await sequelize.transaction();
   const newExpense = {
     amount: req.body.amount,
     description: req.body.description,
     category: req.body.category,
     userId: req.user.id,
   };
-  Expense.create(newExpense)
-    .then((result) => {
-      res.status(200).json(newExpense);
-    })
-    .catch((err) => console.log(err));
+  try{
+    await Expense.create(newExpense, { transaction: transact });
+    const total=Number(req.user.totalExpense) + Number(newExpense.amount);
+    await User.update(
+      {
+        totalExpense: total,
+      },
+      {
+        where: { id: req.user.id },
+        transaction: transact,
+      }
+    );
+    await transact.commit();
+    res.status(200).json({success:true,newExpense});
+  }catch(err){
+    await transact.rollback();
+    return res.status(500).json({ success: false, error: err });
+  }
 };
 
 exports.getExpenses = async (req, res, next) => {
@@ -38,19 +41,21 @@ exports.getExpenses = async (req, res, next) => {
 };
 
 exports.deleteExpense = async (req, res, next) => {
+  const transact=await sequelize.transaction();
   const expenseId = req.params.expenseId;
-  Expense.findByPk(expenseId)
-    .then((product) => {
-      User.findByPk(product.dataValues.userId)
-        .then((user) => {
-          user.update({
-            totalExpense:
-              user.dataValues.totalExpense - Number(product.dataValues.amount),
-          });
-        })
-        .then(() => product.destroy())
-        .catch((err) => console.log(err));
-    })
-    .catch((err) => console.log(err));
-  res.status(200).json({ message: "expense deleted!" });
+  try{  
+    const product=await Expense.findByPk(expenseId, { transaction: transact });
+    const user=await User.findByPk(product.dataValues.userId, { transaction: transact });
+    await user.update({
+      totalExpense:
+      user.dataValues.totalExpense -
+      Number(product.dataValues.amount),
+    });
+    await transact.commit();
+    product.destroy();
+    res.status(200).json({ success:true,message: "expense deleted!" });
+  }catch(err){
+    await transact.rollback();
+    return res.status(500).json({ success: false, error: err });
+  }
 };

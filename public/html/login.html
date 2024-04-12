@@ -23,8 +23,10 @@
           <button>Login</button>
         </div>
       </form>
-      <div class='loginActions'>
-        <button onclick="showSignupPage()">Don't have an account? Sign up</button>
+      <div class="loginActions">
+        <button onclick="showSignupPage()">
+          Don't have an account? Sign up
+        </button>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
@@ -34,7 +36,7 @@
       const passwordInp = document.querySelector("#password");
 
       form.addEventListener("submit", addUser);
-      function addUser(e) {
+      async function addUser(e) {
         e.preventDefault();
         let email = emailInp.value;
         let password = passwordInp.value;
@@ -42,19 +44,17 @@
           email,
           password
         };
-        axios
-          .post("http://localhost:3000/user/login", obj)
-          .then((response) => {
-            alert(response.data.message);
-            localStorage.setItem('token',response.data.token);
-            localStorage.setItem('isPremium',response.data.isPremium);
-            window.location.href="http://localhost:3000/expenses";
-            emailInp.value = "";
-            passwordInp.value = "";
-          })
-          .catch((err) => {
-            alert(err.response.data.error);
-          });
+        try{
+          const response=await axios.post("http://localhost:3000/user/login", obj);
+          alert(response.data.message);
+          localStorage.setItem('token',response.data.token);
+          localStorage.setItem('isPremium',response.data.isPremium);
+          window.location.href="http://localhost:3000/expenses";
+          emailInp.value = "";
+          passwordInp.value = "";
+        }catch(err){
+          alert(err.response.data.error);
+        }
       }
 
       function showSignupPage(){

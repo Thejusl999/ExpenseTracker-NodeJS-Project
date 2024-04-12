@@ -39,7 +39,7 @@
       const passwordInp = document.querySelector("#password");
 
       form.addEventListener("submit", addUser);
-      function addUser(e) {
+      async function addUser(e) {
         e.preventDefault();
         let name = nameInp.value;
         let email = emailInp.value;
@@ -49,19 +49,17 @@
           email,
           password
         };
-        axios
-          .post("http://localhost:3000/user/signup", obj)
-          .then((response) => {
-            alert(`User signed up successfully!`);
-            window.location.href="http://localhost:3000/user/login";
-          })
-          .catch((err) => {
-            alert(`User already exists!`);
-            window.location.href="http://localhost:3000/user/login";
-          });
-        nameInp.value = "";
-        emailInp.value = "";
-        passwordInp.value = "";
+        try{
+          const response=await axios.post("http://localhost:3000/user/signup", obj);
+          alert(`User signed up successfully!`);
+        }catch(err){
+          alert(`User already exists!`);
+        }finally{
+          nameInp.value = "";
+          emailInp.value = "";
+          passwordInp.value = "";
+          window.location.href="http://localhost:3000/user/login";
+        }
       }
 
       function showLoginPage(){
