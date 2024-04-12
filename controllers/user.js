@@ -4,6 +4,13 @@ const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
 const secretKey = require("../util/secretKey");
 
+const sendInBlue=require('sib-api-v3-sdk');
+const client=sendInBlue.ApiClient.instance;
+const apiKey=client.authentications['api-key'];
+apiKey.apiKey=process.env.API_KEY;
+const transEmailApi=new sendInBlue.TransactionalEmailsApi();
+
+
 exports.signupUser = async (req, res, next) => {
   const { name, email, password } = req.body;
   const newUser = { name, email, password };
@@ -59,3 +66,29 @@ exports.loginUser = async (req, res, next) => {
 exports.connectLogin = async (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "html", "login.html"));
 };
+
+exports.connectForgotPassword=(req,res,next)=>{
+  res.sendFile(path.join(__dirname, "..", "public", "html", "forgotPassword.html"));
+}
+
+exports.forgotPassword=async(req,res,next)=>{
+  const {email}=req.body;
+  const sender={
+    email:'expenses@gmail.com'
+  }
+  const receivers=[{
+    email:email
+  }]
+  try{
+    const response=await transEmailApi.sendTransacEmail({
+      sender,
+      to:receivers,
+      subject: 'This is a dummy mail',
+      textContent:`
+      Please note that this is a dummy mail`
+    });
+    res.status(200).json({ success: true });
+  }catch(err){
+    console.log(err);
+  }
+}
