@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Expense Tracker</title>
     <link rel="stylesheet" href="/css/expenses.css" />
+    <link rel="stylesheet" href="/css/expenseTable.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -57,6 +58,7 @@
               <option value="FUEL">FUEL</option>
               <option value="GROCERIES">GROCERIES</option>
               <option value="TRAVEL">TRAVEL</option>
+              <option value="INCOME">INCOME</option>
             </select>
           </div>
         </div>
@@ -74,17 +76,60 @@
         <h3>LEADERBOARD</h3>
         <ul id="leaderboard"></ul>
       </div>
+      
+    </div>
+    <div id="expensesTableDiv" class="mt-5 container form1" style="display: none">
+      <h3>EXPENSE TABLE</h3>
+      <div id="premiumFeatures" style="display: none !important" class="row mb-4 d-flex flex-row justify-content-center align-items-center" style="display: none">
+        <a href={downloadUrl}><img src='./download icon.png' alt='download icon'/></a>
+        <div class="col-auto">
+          <select id="filterType" class="form-control">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+        <div class="col-auto">
+          <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+        </div>
+      </div>
+      <table id="expensesTable" class="table table-bordered">
+        <h5>Expense Table</h5>       
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="expensesBody"></tbody>
+      </table>
+      <table id="incomeTable" class="table table-bordered">
+        <h5>Income Table</h5>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="incomeBody"></tbody>
+      </table>
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
       const isPremium = localStorage.getItem("isPremium");
-      if (isPremium !== "null") {
+      if (isPremium!=='null') {
         document.getElementById("premiumBtn").textContent =
           "You are a Premium User";
         document.getElementById("premiumBtn").onclick = null;
         document.getElementById("premiumBtn").style.cursor = "not-allowed";
         document.getElementById("leaderboardBtn").style.display = "inline";
+        document.getElementById("premiumFeatures").style.display = "block";
       }
 
       const form = document.querySelector("#form");
@@ -114,20 +159,24 @@
             category,
           };
           const token = localStorage.getItem("token");
-          try{
-            const response=await axios
-              .post("http://localhost:3000/expenses/addExpense", obj, {
-                headers: { 'Authorization': token },
-              });
+          try {
+            const response = await axios.post(
+              "http://localhost:3000/expenses/addExpense",
+              obj,
+              {
+                headers: { Authorization: token },
+              }
+            );
             showExpense(response.data.newExpense);
             document.getElementById("leaderboardDiv").style.display = "none";
             if (expenseList.childElementCount > 0) {
               document.getElementById("expensesDiv").style.display = "block";
+              document.getElementById("expensesTableDiv").style.display = "block";
             }
             expenseamtInp.value = "";
             descriptionInp.value = "";
             categoryInp.value = "";
-          }catch(err){
+          } catch (err) {
             console.log(err);
           }
         }
@@ -145,20 +194,23 @@
         expenseList.appendChild(newLi);
       }
 
-      window.addEventListener("DOMContentLoaded", async() => {
+      window.addEventListener("DOMContentLoaded", async () => {
         const token = localStorage.getItem("token");
-        try{
-          const response=await axios
-            .get("http://localhost:3000/expenses/getExpenses", {
-              headers: { 'Authorization': token },
-            });
+        try {
+          const response = await axios.get(
+            "http://localhost:3000/expenses/getExpenses",
+            {
+              headers: { Authorization: token },
+            }
+          );
           for (let i = 0; i < response.data.length; i++) {
             showExpense(response.data[i]);
             if (expenseList.childElementCount > 0) {
               document.getElementById("expensesDiv").style.display = "block";
+              document.getElementById("expensesTableDiv").style.display = "block";
             }
           }
-        }catch(err){
+        } catch (err) {
           console.log(err);
         }
       });
@@ -170,28 +222,35 @@
             let elementToDelete =
               e.target.parentElement.textContent.split("-")[1];
             const token = localStorage.getItem("token");
-            try{
-              const response=await axios
-                .get("http://localhost:3000/expenses/getExpenses", {
-                  headers: { 'Authorization': token },
-                });
+            try {
+              const response = await axios.get(
+                "http://localhost:3000/expenses/getExpenses",
+                {
+                  headers: { Authorization: token },
+                }
+              );
               for (let i = 0; i < response.data.length; i++) {
                 if (response.data[i].description === elementToDelete) {
                   let deletedUser = response.data[i].description;
-                  try{
-                    await axios.delete("http://localhost:3000/deleteExpense/" +response.data[i].id);
+                  try {
+                    await axios.delete(
+                      "http://localhost:3000/deleteExpense/" +
+                        response.data[i].id
+                    );
                     expenseList.removeChild(e.target.parentElement);
                     console.log(deletedUser, "has been removed!");
-                    document.getElementById("leaderboardDiv").style.display = "none";
+                    document.getElementById("leaderboardDiv").style.display =
+                      "none";
                     if (expenseList.childElementCount === 0) {
-                      document.getElementById("expensesDiv").style.display ="none";
+                      document.getElementById("expensesDiv").style.display =
+                        "none";
                     }
-                  }catch(err){
+                  } catch (err) {
                     console.log(err);
                   }
                 }
               }
-            }catch(err){
+            } catch (err) {
               console.log(err);
             }
           }
@@ -201,25 +260,26 @@
       async function premiumHandler(e) {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        try{
-          const response=await axios
-            .get("http://localhost:3000/premium/buyPremium", {
-              headers: { 'Authorization': token },
-            });
+        try {
+          const response = await axios.get(
+            "http://localhost:3000/premium/buyPremium",
+            {
+              headers: { Authorization: token },
+            }
+          );
           let options = {
-            "key": response.data.key_id,
-            "order_id": response.data.order.id,
-            "handler": async(res) => {
-              try{
-                const response=await axios
-                  .post(
-                    "http://localhost:3000/premium/updateStatus",
-                    {
-                      order_id: options.order_id,
-                      payment_id: res.razorpay_payment_id,
-                    },
-                    { headers: { 'Authorization': token } }
-                  );
+            key: response.data.key_id,
+            order_id: response.data.order.id,
+            handler: async (res) => {
+              try {
+                const response = await axios.post(
+                  "http://localhost:3000/premium/updateStatus",
+                  {
+                    order_id: options.order_id,
+                    payment_id: res.razorpay_payment_id,
+                  },
+                  { headers: { Authorization: token } }
+                );
                 alert("You are now a Premium User!");
                 localStorage.setItem("isPremium", true);
                 document.getElementById("premiumBtn").textContent =
@@ -229,42 +289,40 @@
                   "not-allowed";
                 document.getElementById("leaderboardBtn").style.display =
                   "inline";
-              }catch(err){
+              } catch (err) {
                 alert("Something went wrong. Please retry!");
-                const response=await axios
-                .post(
+                const response = await axios.post(
                   "http://localhost:3000/premium/updateStatus",
                   {
                     order_id: options.order_id,
                     payment_id: res.razorpay_payment_id,
-                    status:'FAILED'
+                    status: "FAILED",
                   },
-                  { headers: { 'Authorization': token } }
+                  { headers: { Authorization: token } }
                 );
-                alert('Transaction Failed. Please retry!');
+                alert("Transaction Failed. Please retry!");
               }
             },
           };
           const razorpayUI = new Razorpay(options);
           razorpayUI.open();
-          razorpayUI.on("payment.failed", async(res) => {
-            try{  
-              const response=await axios
-                .post(
-                  "http://localhost:3000/premium/updateStatus",
-                  {
-                    order_id: options.order_id,
-                    payment_id: res.razorpay_payment_id,
-                    status:'FAILED'
-                  },
-                  { headers: { 'Authorization': token } }
-                );
-              alert('Transaction Failed. Please retry!');
-            }catch(err){
+          razorpayUI.on("payment.failed", async (res) => {
+            try {
+              const response = await axios.post(
+                "http://localhost:3000/premium/updateStatus",
+                {
+                  order_id: options.order_id,
+                  payment_id: res.razorpay_payment_id,
+                  status: "FAILED",
+                },
+                { headers: { Authorization: token } }
+              );
+              alert("Transaction Failed. Please retry!");
+            } catch (err) {
               alert(err.response.data.message);
             }
           });
-        }catch(err){
+        } catch (err) {
           alert("Transaction Failed!");
         }
       }
@@ -272,12 +330,15 @@
       async function showLeaderboard(e) {
         const token = localStorage.getItem("token");
         document.getElementById("leaderboardDiv").style.display = "block";
-        document.getElementById("leaderboardBtn").textContent = "UPDATE LEADERBOARD";
-        try{
-          const response=await axios
-            .get("http://localhost:3000/premium/showLeaderboard", {
-              headers: { 'Authorization': token },
-            });
+        document.getElementById("leaderboardBtn").textContent =
+          "UPDATE LEADERBOARD";
+        try {
+          const response = await axios.get(
+            "http://localhost:3000/premium/showLeaderboard",
+            {
+              headers: { Authorization: token },
+            }
+          );
           while (leaderboardList.firstChild) {
             leaderboardList.removeChild(leaderboardList.firstChild);
           }
@@ -289,10 +350,92 @@
             li.appendChild(document.createTextNode(details));
             leaderboardList.appendChild(li);
           });
-        }catch(err){
+        } catch (err) {
           console.log(err);
         }
       }
+
+      document.addEventListener("DOMContentLoaded", function() {
+        const refreshBtn = document.getElementById("refreshBtn");
+        const filterType = document.getElementById("filterType");
+        const expensesBody = document.getElementById("expensesBody");
+        const incomeBody = document.getElementById("incomeBody");
+
+        refreshBtn.addEventListener("click", refreshData);
+        filterType.addEventListener("change", filterData);
+
+        function refreshData() {
+          fetchExpenses();
+          fetchIncome();
+        }
+        refreshData();
+
+        function filterData() {
+          
+        }
+
+        async function fetchExpenses() {
+          try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+              "http://localhost:3000/expenses/getExpenses",
+              {
+                headers: { Authorization: token },
+              }
+            );
+            const filtered=response.data.filter(expense=>{
+              expense.category!=='SALARY'
+            })
+            renderExpenses(response.data);
+          } catch (error) {
+            console.error("Error fetching expenses:", error);
+          }
+        }
+
+        async function fetchIncome() {
+          try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+              "http://localhost:3000/expenses/getExpenses",
+              {
+                headers: { Authorization: token },
+              }
+            );
+            renderIncome(response.data);
+          } catch (error) {
+            console.error("Error fetching income:", error);
+          }
+        }
+
+        function renderExpenses(data) {
+          expensesBody.innerHTML = "";
+
+          data.filter(expense=>expense.category!=='INCOME').forEach(expense => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${expense.date}</td>
+              <td>${expense.description}</td>
+              <td>${expense.category}</td>
+              <td>${expense.amount}</td>
+            `;
+            expensesBody.appendChild(row);
+          });
+        }
+
+        function renderIncome(data) {
+          incomeBody.innerHTML = "";
+          data.filter(expense=>expense.category==='INCOME').forEach(income => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${income.date}</td>
+              <td>${income.description}</td>
+              <td>${income.category}</td>
+              <td>${income.amount}</td>
+            `;
+            incomeBody.appendChild(row);
+          });
+        }
+    });
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"

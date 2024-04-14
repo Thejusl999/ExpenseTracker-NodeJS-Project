@@ -1,0 +1,25 @@
+h3{
+    font-weight: bold !important;
+}
+
+.table-bordered {
+    border-collapse: collapse;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid black !important;
+}
+
+.table-bordered thead th,
+.table-bordered thead td {
+    border-bottom-width: 2px;
+    background-color: seagreen;
+}
+
+img{
+    width:30px;
+    height:30px;
+    float:right;
+    margin-top:-2.5rem;
+}
