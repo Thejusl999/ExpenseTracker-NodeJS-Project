@@ -1,7 +1,12 @@
 const Razorpay = require("razorpay");
 const Order = require("../models/Order");
 const User=require('../models/User');
+const Download=require('../models/Download')
 const sequelize = require("../util/database");
+
+// const AWS=require('aws-sdk');    // Moved to services folder
+const UserServices=require('../services/userservices');
+const S3Services=require('../services/s3services');
 
 exports.buyPremium = async(req, res) => {
   const razorpay = new Razorpay({
@@ -69,3 +74,59 @@ exports.showLeaderboard=async(req,res)=>{
       .json({ success: false, error: "Internal Server Error!" });
   }
 };
+
+// Moved to services folder
+/* function uploadToS3(data,filename){
+  const BUCKET_NAME=process.env.BUCKET_NAME;
+  const IAM_USER_KEY=process.env.IAM_USER_KEY;
+  const IAM_USER_SECRET=process.env.IAM_USER_SECRET;
+
+  let s3Bucket=new AWS.S3({
+    accessKeyId:IAM_USER_KEY,
+    secretAccessKey:IAM_USER_SECRET
+  });
+
+  var params={
+    Bucket:BUCKET_NAME,
+    Key:filename,
+    Body:data,
+    ACL:'public-read'
+  };
+  return new Promise((resolve,reject)=>{
+    s3Bucket.upload(params,(err,s3response)=>{
+      if(err){
+        console.log('Something went wrong!',err);
+        reject(err);
+      }else{
+        console.log('Success!',s3response);
+        resolve(s3response.Location);
+      }
+    });
+  })
+} */
+
+exports.downloadExpenses=async(req,res)=>{
+  try{
+    // const expenses=await req.user.getExpenses();
+    const expenses=await UserServices.getExpenses(req);
+    const stringifiedExpenses=JSON.stringify(expenses);
+    const userId=req.user.id;
+    const filename=`Expenses${userId}/${new Date()}.text`;
+    const fileURL=await S3Services.uploadToS3(stringifiedExpenses,filename);
+    await Download.create({url:fileURL,filename:filename.split('/')[1].substring(4,21),userId:req.user.id});
+    res.status(200).json({fileURL,success:true});
+  }catch(err){
+    res.status(500).json({fileURL:'',success:false,err:err});
+  }
+}
+
+exports.getDownloads=async(req,res)=>{
+  try{
+    const downloads=await Download.findAll({where:{userId:req.user.id}});
+    return res.status(200).json({success:true,downloads});
+  }catch(err){
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error!" });
+  }
+}

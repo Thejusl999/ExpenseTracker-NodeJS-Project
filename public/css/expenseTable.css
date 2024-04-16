@@ -1,4 +1,4 @@
-h3{
+h5{
     font-weight: bold !important;
 }
 
@@ -17,9 +17,24 @@ h3{
     background-color: seagreen;
 }
 
-img{
+.downloadBtn{
+    border: none;
+    padding: 0px;
+}
+
+#refreshBtn{
+    float:left;
+    margin-top:-2rem;
+}
+
+#refreshDownloadsBtn{
+    float:right;
+    margin-top:-2rem;
+}
+
+.downloadBtn img{
     width:30px;
     height:30px;
     float:right;
-    margin-top:-2.5rem;
+    margin-top:-2rem;
 }

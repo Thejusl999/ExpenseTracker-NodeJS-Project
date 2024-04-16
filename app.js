@@ -9,6 +9,7 @@ const User=require('./models/User');
 const Expense=require('./models/Expense');
 const Order=require('./models/Order');
 const ForgotPasswordReq=require('./models/ForgotPasswordReq');
+const Download=require('./models/Download');
 
 const app = express();
 app.use(cors());
@@ -31,6 +32,9 @@ Order.belongsTo(User);
 
 User.hasMany(ForgotPasswordReq);
 ForgotPasswordReq.belongsTo(User);
+
+User.hasMany(Download);
+Download.belongsTo(User);
 
 sequelize
     .sync()
