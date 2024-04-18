@@ -36,8 +36,26 @@ exports.addExpense = async (req, res, next) => {
 };
 
 exports.getExpenses = async (req, res, next) => {
-  const expenses = await Expense.findAll({ where: { userId: req.user.id } });
-  res.status(200).json(expenses);
+  const page=req.query.page;
+  console.log(page)
+  try {
+    if(page){
+      let perpageCount=10;
+      const response = await Expense.findAll({
+        where: { userId: req.user.id },
+        offset: (page - 1)*perpageCount,
+        limit:perpageCount
+      });
+      return res.status(200).json({ success: true, response });
+    }else{
+      const response = await Expense.findAll({ where: { userId: req.user.id } });
+      return res.status(200).json({ success: true, response });
+    }
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal Server Error!" });
+  }
 };
 
 exports.deleteExpense = async (req, res, next) => {

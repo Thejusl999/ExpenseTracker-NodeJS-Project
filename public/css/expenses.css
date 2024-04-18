@@ -11,6 +11,8 @@
   margin: 3rem auto;
   background-color: #d2b48c;
   pointer-events: all;
+  width: 60rem;
+  max-width: 100%;
 }
 .form1 {
   font-weight: bold;

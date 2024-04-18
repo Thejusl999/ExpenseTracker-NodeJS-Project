@@ -71,6 +71,7 @@
       <div id="expensesDiv" class="container form1" style="display: none">
         <h5>EXPENSES</h5>
         <ul id="expenses"></ul>
+        <div class="expPagination" id="expPagination"></div>
       </div>
       <div id="leaderboardDiv" class="container form1" style="display: none">
         <h5>LEADERBOARD</h5>
@@ -79,9 +80,9 @@
     </div>
     <div class="row mx-4 bigDivs">
       <div class="col-6">
-        <div id="expensesTableDiv" class="mt-5 container form1" style="display: none">
+        <div id="expensesTableDiv" class="container form1" style="display: none">
           <h5>EXPENSE-INCOME TABLE</h5>
-          <div class="row mb-2 d-flex flex-row justify-content-center align-items-center">
+          <div class="row d-flex flex-row justify-content-center align-items-center">
             <button class="downloadBtn" onclick="downloadExpenses(event)">
               <img id="premiumFeatures" style="display: none !important;" src='./download icon.png' alt='download icon'/>
             </button>
@@ -128,6 +129,7 @@
             </thead>
             <tbody id="downloadsBody"></tbody>
           </table>
+          <div class="pagination" id="pagination"></div>
         </div>
       </div>
     </div>
@@ -135,6 +137,13 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
+      const downloadsPageSize = 3;
+      let downloadsCurrentPage = 1;
+      const expPageSize = 10;
+      let expCurrentPage = 1;
+      const pagination = document.getElementById('pagination');
+      const expPagination = document.getElementById('expPagination');
+
       const isPremium = localStorage.getItem("isPremium");
       if (isPremium!=='null') {
         document.getElementById("premiumBtn").textContent =
@@ -206,27 +215,6 @@
         newLi.appendChild(delBtn);
         expenseList.appendChild(newLi);
       }
-
-      window.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("token");
-        try {
-          const response = await axios.get(
-            "http://localhost:3000/expenses/getExpenses",
-            {
-              headers: { 'Authorization': token },
-            }
-          );
-          for (let i = 0; i < response.data.length; i++) {
-            showExpense(response.data[i]);
-            if (expenseList.childElementCount > 0) {
-              document.getElementById("expensesDiv").style.display = "block";
-              document.getElementById("expensesTableDiv").style.display = "block";
-            }
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      });
 
       expenseList.addEventListener("click", deleteItem);
       async function deleteItem(e) {
@@ -379,7 +367,8 @@
 
         refreshBtn.addEventListener("click", refreshData);
         function refreshData() {
-          fetchExpenses();
+          fetchExpenses(expCurrentPage);
+          fetchExpenses()
           fetchIncome();
         }
         refreshDownloadsBtn.addEventListener("click", refreshDownloads);
@@ -389,19 +378,16 @@
         refreshData();
         refreshDownloads();
 
-        async function fetchExpenses() {
+        async function fetchExpenses(page) {
           try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-              "http://localhost:3000/expenses/getExpenses",
+              `http://localhost:3000/expenses/getExpenses`,
               {
                 headers: { 'Authorization': token },
               }
             );
-            const filtered=response.data.filter(expense=>{
-              expense.category!=='SALARY'
-            })
-            renderExpenses(response.data.filter(expense=>expense.category!=='INCOME'));
+            renderExpenses(response.data.response.filter(expense=>expense.category!=='INCOME'));
           } catch (error) {
             console.error("Error fetching expenses:", error);
           }
@@ -411,33 +397,33 @@
           try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-              "http://localhost:3000/expenses/getExpenses",
+              `http://localhost:3000/expenses/getExpenses`,
               {
                 headers: { 'Authorization': token },
               }
             );
-            renderIncome(response.data.filter(expense=>expense.category==='INCOME'));
+            renderIncome(response.data.response.filter(expense=>expense.category==='INCOME'));
           } catch (error) {
             console.error("Error fetching income:", error);
           }
         }
 
-        async function fetchDownloads(){
+        async function fetchDownloads(page){
           try {
             const token = localStorage.getItem("token");
             const response = await axios.get(
-              "http://localhost:3000/premium/getDownloads",
+              `http://localhost:3000/premium/getDownloads/`,
               {
                 headers: { 'Authorization': token },
               }
             );
-            renderDownloads(response.data.downloads);
-          } catch (error) {
+            return response.data.downloads;
+          }catch (error) {
             console.error("Error fetching income:", error);
           }
         }
 
-        function renderExpenses(data) {
+        async function renderExpenses(data) {
           expensesBody.innerHTML = "";
           if(data.length>0){
             data.forEach(expense => {
@@ -479,10 +465,62 @@
           }
         }
 
-        function renderDownloads(data) {
+        async function generatePagination(url,size,divName,currPage,loadCategory) {
+          divName.innerHTML = '';
+          const data = await fetchPageData(url);
+          const pageCount = Math.ceil(data.response.length / size);
+          for (let i = 1; i <= pageCount; i++) {
+            const button = document.createElement('button');
+            button.textContent = i;
+            button.addEventListener('click', () => {
+              if(divName==='pagination'){
+                downloadsCurrentPage=i;
+                currPage = downloadsCurrentPage;
+              }else{
+                expCurrentPage=i;
+                currPage = expCurrentPage;
+              }
+              updateActiveButton(divName,currPage,loadCategory);
+            });
+            divName.appendChild(button);
+          }
+          updateActiveButton(divName,currPage,loadCategory);
+        }
+
+        function updateActiveButton(divName,currPage,category) {
+          const buttons = divName.querySelectorAll('button');
+          buttons.forEach(async(button) => {
+            button.classList.remove('active');
+            if (parseInt(button.textContent) === currPage) {
+              button.classList.add('active');
+              category(button.textContent);
+            }
+          });
+        }
+        async function fetchPageData(url,page){
+          try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+              url,
+              {
+                headers: { 'Authorization': token },
+              }
+            );
+            return(response.data);
+          } catch (error) {
+            console.error(error);
+          }
+        }
+        renderDownloads(downloadsCurrentPage);
+        generatePagination(`http://localhost:3000/premium/getDownloads`,downloadsPageSize,pagination,downloadsCurrentPage,renderDownloads);
+        renderExpenses(expCurrentPage);
+        generatePagination(`http://localhost:3000/expenses/getExpenses`,expPageSize,expPagination,expCurrentPage,fetch);
+
+        async function renderDownloads(page) {
           downloadsBody.innerHTML = "";
-          if(data.length>0){
-            data.forEach(download => {
+          const data = await fetchPageData(`http://localhost:3000/premium/getDownloads?page=${page}`,page);
+          if(data.response.length>0){
+            data.response.forEach(download => {
               const row = document.createElement("tr");
               const filenameCell = document.createElement("td");
               row.appendChild(filenameCell);
@@ -502,6 +540,28 @@
               <td colspan='2'>No Downloads Yet</td>
             `;
             downloadsBody.appendChild(row);
+          }
+        }
+
+        async function fetch() {
+          expenseList.innerHTML='';
+          const token = localStorage.getItem("token");
+          try {
+            const response = await axios.get(
+              `http://localhost:3000/expenses/getExpenses?page=${expCurrentPage}`,
+              {
+                headers: { 'Authorization': token },
+              }
+            );
+            for (let i = 0; i < response.data.response.length; i++) {
+              showExpense(response.data.response[i]);
+              if (expenseList.childElementCount > 0) {
+                document.getElementById("expensesDiv").style.display = "block";
+                document.getElementById("expensesTableDiv").style.display = "block";
+              }
+            }
+          } catch (err) {
+            console.log(err);
           }
         }
     });
