@@ -70,6 +70,15 @@
       </form>
       <div id="expensesDiv" class="container form1" style="display: none">
         <h5>EXPENSES</h5>
+        <label class="form-label">Rows per page:</label>
+        <select id="expRows">
+          <option value="" required disabled selected>-</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
         <ul id="expenses"></ul>
         <div class="expPagination" id="expPagination"></div>
       </div>
@@ -121,6 +130,17 @@
             <div class="col-12">
               <button id="refreshDownloadsBtn" class="btn btn-primary">Refresh</button>
             </div>
+            <div class="col-12 d-flex flex-row align-items-center justify-content-center">
+              <label class="form-label" style="display: inline;">Rows per page:</label>
+              <select id="dwnRows">
+                <option value="" required disabled selected>-</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
             <thead>
               <tr>
                 <th class="col-4">Link</th>
@@ -137,9 +157,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
-      const downloadsPageSize = 3;
       let downloadsCurrentPage = 1;
-      const expPageSize = 10;
       let expCurrentPage = 1;
       const pagination = document.getElementById('pagination');
       const expPagination = document.getElementById('expPagination');
@@ -365,6 +383,9 @@
         const refreshDownloadsBtn = document.getElementById("refreshDownloadsBtn");
         const downloadsBody = document.getElementById("downloadsBody");
 
+        document.getElementById('expRows').value=localStorage.getItem('expRows');
+        document.getElementById('dwnRows').value=localStorage.getItem('dwnRows');
+        
         refreshBtn.addEventListener("click", refreshData);
         function refreshData() {
           fetchExpenses(expCurrentPage);
@@ -465,15 +486,21 @@
           }
         }
 
-        async function generatePagination(url,size,divName,currPage,loadCategory) {
+        async function generatePagination(url,divName,currPage,loadCategory) {
           divName.innerHTML = '';
           const data = await fetchPageData(url);
+          let size;
+          if(divName.className==='pagination'){
+            size=localStorage.getItem('dwnRows'); 
+          }else{
+            size=localStorage.getItem('expRows');
+          }
           const pageCount = Math.ceil(data.response.length / size);
           for (let i = 1; i <= pageCount; i++) {
             const button = document.createElement('button');
             button.textContent = i;
             button.addEventListener('click', () => {
-              if(divName==='pagination'){
+              if(divName.className==='pagination'){
                 downloadsCurrentPage=i;
                 currPage = downloadsCurrentPage;
               }else{
@@ -512,13 +539,13 @@
           }
         }
         renderDownloads(downloadsCurrentPage);
-        generatePagination(`http://localhost:3000/premium/getDownloads`,downloadsPageSize,pagination,downloadsCurrentPage,renderDownloads);
-        renderExpenses(expCurrentPage);
-        generatePagination(`http://localhost:3000/expenses/getExpenses`,expPageSize,expPagination,expCurrentPage,fetch);
+        generatePagination(`http://localhost:3000/premium/getDownloads`,pagination,downloadsCurrentPage,renderDownloads);
+        fetch(expCurrentPage);
+        generatePagination(`http://localhost:3000/expenses/getExpenses`,expPagination,expCurrentPage,fetch);
 
         async function renderDownloads(page) {
           downloadsBody.innerHTML = "";
-          const data = await fetchPageData(`http://localhost:3000/premium/getDownloads?page=${page}`,page);
+          const data = await fetchPageData(`http://localhost:3000/premium/getDownloads?page=${page}&pageSize=${localStorage.getItem('dwnRows')}`,page);
           if(data.response.length>0){
             data.response.forEach(download => {
               const row = document.createElement("tr");
@@ -548,7 +575,7 @@
           const token = localStorage.getItem("token");
           try {
             const response = await axios.get(
-              `http://localhost:3000/expenses/getExpenses?page=${expCurrentPage}`,
+              `http://localhost:3000/expenses/getExpenses?page=${expCurrentPage}&pageSize=${localStorage.getItem('expRows')}`,
               {
                 headers: { 'Authorization': token },
               }
@@ -583,6 +610,21 @@
           throw new Error(response.data.message);
         }
       }
+
+      document.getElementById('expRows').addEventListener('change',function(){
+        localStorage.setItem('expRows',this.value);
+        if(localStorage.getItem('expRows')>0){
+          window.location.reload();
+        }
+      });
+
+      document.getElementById('dwnRows').addEventListener('change',function(){
+        localStorage.setItem('dwnRows',this.value);
+        if(localStorage.getItem('dwnRows')>0){
+          window.location.reload();
+        }
+      });
+
     </script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"

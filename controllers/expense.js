@@ -36,15 +36,13 @@ exports.addExpense = async (req, res, next) => {
 };
 
 exports.getExpenses = async (req, res, next) => {
-  const page=req.query.page;
-  console.log(page)
+  const {page,pageSize}=req.query;
   try {
     if(page){
-      let perpageCount=10;
       const response = await Expense.findAll({
         where: { userId: req.user.id },
-        offset: (page - 1)*perpageCount,
-        limit:perpageCount
+        offset: (page - 1)*Number(pageSize),
+        limit:Number(pageSize)
       });
       return res.status(200).json({ success: true, response });
     }else{

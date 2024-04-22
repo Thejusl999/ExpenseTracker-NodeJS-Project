@@ -133,14 +133,13 @@ exports.downloadExpenses = async (req, res) => {
 };
 
 exports.getDownloads = async (req, res) => {
-  const page=req.query.page;
+  const {page,pageSize}=req.query;
   try {
     if(page){
-      let perpageCount=3;
       const response = await Download.findAll({
         where: { userId: req.user.id },
-        offset: (page - 1)*perpageCount,
-        limit:perpageCount
+        offset: (page - 1)*Number(pageSize),
+        limit:Number(pageSize)
       });
       return res.status(200).json({ success: true, response });
     }else{
