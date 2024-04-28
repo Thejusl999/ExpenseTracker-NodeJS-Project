@@ -10,8 +10,8 @@ const S3Services = require("../services/s3services");
 
 exports.buyPremium = async (req, res) => {
   const razorpay = new Razorpay({
-    key_id: process.env.razorpayKey_id,
-    key_secret: process.env.razorpayKey_secret,
+    key_id: process.env.RAZORPAYKEY_ID,
+    key_secret: process.env.RAZORPAYKEY_SECRET,
   });
 
   try {

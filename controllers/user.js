@@ -2,7 +2,6 @@ const path = require("path");
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jsonwebtoken = require("jsonwebtoken");
-const secretKey = require("../util/secretKey");
 const sequelize=require('../util/database');
 
 const sendInBlue=require('sib-api-v3-sdk');
@@ -39,7 +38,7 @@ exports.connectSignup = async (req, res) => {
 };
 
 function generateToken(id, name) {
-  return jsonwebtoken.sign({ userId: id, username: name }, secretKey);
+  return jsonwebtoken.sign({ userId: id, username: name }, process.env.JWTSECRETKEY);
 }
 
 exports.loginUser = async (req, res, next) => {
@@ -101,7 +100,7 @@ exports.forgotPassword=async(req,res,next)=>{
       to:receivers,
       subject: 'Reset Your Password',
       textContent:`
-      Hello ${name},\n\nYou recently requested to reset your password for your account. Click the link below to reset it:\n\nhttp://localhost:3000/password/resetpassword/${uuid}\n\nIf you did not request a password reset, please ignore this email or reply to let us know. This link is only valid once.\n\nThanks,\nExpense Tracker`
+      Hello ${name},\n\nYou recently requested to reset your password for your account. Click the link below to reset it:\n\nhttp://localhost:3000/user/resetpassword/${uuid}\n\nIf you did not request a password reset, please ignore this email or reply to let us know. This link is only valid once.\n\nThanks,\nExpense Tracker`
     });
     await ForgotPasswordReq.create({id:uuid,userId:id,isActive:true});
     await transact.commit();
@@ -126,7 +125,7 @@ exports.connectResetPassword=async(req,res,next)=>{
       const alertHTML = `
         <script>
           alert("Reset Password link has expired!"); 
-          window.location.href = "/password/forgotPassword";
+          window.location.href = "/user/forgotPassword";
         </script>
       `;
       return res.status(403).send(alertHTML);

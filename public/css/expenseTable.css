@@ -23,6 +23,10 @@ h5{
     overflow-y: scroll;
 }
 
+#expensesBody, td{
+    background-color: tan !important;
+}
+
 #downloadsDiv{
     padding-top: 1.5rem;
     height: 27rem;

@@ -27,44 +27,11 @@
           <button>Sign up</button>
         </div>
       </form>
-      <div class='loginActions'>
-        <button onclick="showLoginPage()">Already have an account? Login</button>
+      <div class="loginActions">
+        <button id="loginBtn">Already have an account? Login</button>
       </div>
     </div>
+    <script src="/js/signup.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
-    <script>
-      const form = document.querySelector("#form");
-      const nameInp = document.querySelector("#name");
-      const emailInp = document.querySelector("#email");
-      const passwordInp = document.querySelector("#password");
-
-      form.addEventListener("submit", addUser);
-      async function addUser(e) {
-        e.preventDefault();
-        let name = nameInp.value;
-        let email = emailInp.value;
-        let password = passwordInp.value;
-        let obj = {
-          name,
-          email,
-          password
-        };
-        try{
-          const response=await axios.post("http://localhost:3000/user/signup", obj);
-          alert(`User signed up successfully!`);
-        }catch(err){
-          alert(`User already exists!`);
-        }finally{
-          nameInp.value = "";
-          emailInp.value = "";
-          passwordInp.value = "";
-          window.location.href="http://localhost:3000/user/login";
-        }
-      }
-
-      function showLoginPage(){
-        window.location.href="http://localhost:3000/user/login";
-      }
-    </script>
   </body>
 </html>
