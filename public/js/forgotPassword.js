@@ -21,11 +21,11 @@ document.addEventListener("DOMContentLoaded", function () {
       console.log(err);
     } finally {
       emailInp.value = "";
-      window.location.href = "http://localhost:3000/user/login";
+      window.location.href = "../html/login.html";
     }
   }
 
   function showSignupPage() {
-    window.location.href = "http://localhost:3000/user/signup";
+    window.location.href = "../html/signup.html";
   }
 });

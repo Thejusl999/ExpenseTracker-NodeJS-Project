@@ -4,7 +4,7 @@ const fs = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const helmet = require("helmet");
+// const helmet = require("helmet");
 const compression = require("compression");
 const morgan = require("morgan");
 
@@ -21,27 +21,27 @@ const accessLogStream = fs.createWriteStream(
 );
 
 const app = express();
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: [
-        "'self'",
-        "'unsafe-inline'",
-        "https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js",
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
-        "https://checkout.razorpay.com/v1/checkout.js",
-      ],
-      styleSrc: [
-        "'self'",
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
-        "'unsafe-inline'",
-        "'unsafe-hashes'",
-      ],
-      frameSrc: ["'self'", "https://api.razorpay.com/"],
-    },
-  })
-);
+// app.use(
+//   helmet.contentSecurityPolicy({
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: [
+//         "'self'",
+//         "'unsafe-inline'",
+//         "https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js",
+//         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js",
+//         "https://checkout.razorpay.com/v1/checkout.js",
+//       ],
+//       styleSrc: [
+//         "'self'",
+//         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
+//         "'unsafe-inline'",
+//         "'unsafe-hashes'",
+//       ],
+//       frameSrc: ["'self'", "https://api.razorpay.com/"],
+//     },
+//   })
+// );
 app.use(compression());
 app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());

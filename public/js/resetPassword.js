@@ -34,6 +34,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showSignupPage() {
-    window.location.href = "http://localhost:3000/user/signup";
+    window.location.href = "../html/signup.html";
   }
 });

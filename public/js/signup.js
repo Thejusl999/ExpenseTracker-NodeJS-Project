@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector("#form");
   const loginBtn = document.querySelector("#loginBtn");
+  localStorage.clear();
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -18,17 +19,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const obj = { name, email, password };
 
     try {
-      const response = await axios.post("/user/signup", obj);
+      const response = await axios.post("http://localhost:3000/user/signup", obj);
       alert("User signed up successfully!");
       clearForm();
-      window.location.href = "/user/login";
     } catch (err) {
       alert("User already exists!");
+    }finally{
+      window.location.href = "../html/login.html";
     }
   }
 
   function showLoginPage() {
-    window.location.href = "/user/login";
+    window.location.href = "../html/login.html";
   }
 
   function clearForm() {

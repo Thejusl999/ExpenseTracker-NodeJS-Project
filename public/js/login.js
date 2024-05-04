@@ -2,7 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.querySelector("#form");
   const signupBtn = document.querySelector("#signupBtn");
   const forgotPasswordBtn = document.querySelector("#forgotPasswordBtn");
-
+  localStorage.clear();
+  
   signupBtn.addEventListener("click", function () {
     showSignupPage();
   });
@@ -27,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
       alert(response.data.message);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("isPremium", response.data.isPremium);
-      window.location.href = "http://localhost:3000/expenses";
+      window.location.href = "../html/expenses.html";
       emailInp.value = "";
       passwordInp.value = "";
     } catch (err) {
@@ -36,10 +37,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function showSignupPage() {
-    window.location.href = "http://localhost:3000/user/signup";
+    window.location.href = "../html/signup.html";
   }
 
   function forgotPasswordHandler() {
-    window.location.href = "http://localhost:3000/user/forgotpassword";
+    window.location.href = "../html/forgotPassword.html";
   }
 });
