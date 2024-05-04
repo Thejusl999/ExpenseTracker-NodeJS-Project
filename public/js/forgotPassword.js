@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let email = emailInp.value;
     try {
       const response = await axios.post(
-        "http://localhost:3000/user/forgotpassword",
+        "http://51.21.2.190:3000/user/forgotpassword",
         { email }
       );
       alert(`Password reset link sent successfully!`);

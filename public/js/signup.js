@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const obj = { name, email, password };
 
     try {
-      const response = await axios.post("http://localhost:3000/user/signup", obj);
+      const response = await axios.post("http://51.21.2.190:3000/user/signup", obj);
       alert("User signed up successfully!");
       clearForm();
     } catch (err) {

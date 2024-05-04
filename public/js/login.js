@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", function () {
       password,
     };
     try {
-      const response = await axios.post("http://localhost:3000/user/login", obj);
+      const response = await axios.post("http://51.21.2.190:3000/user/login", obj);
       alert(response.data.message);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("isPremium", response.data.isPremium);

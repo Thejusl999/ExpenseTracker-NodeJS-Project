@@ -100,7 +100,7 @@ exports.forgotPassword=async(req,res,next)=>{
       to:receivers,
       subject: 'Reset Your Password',
       textContent:`
-      Hello ${name},\n\nYou recently requested to reset your password for your account. Click the link below to reset it:\n\nhttp://localhost:3000/user/resetpassword/${uuid}\n\nIf you did not request a password reset, please ignore this email or reply to let us know. This link is only valid once.\n\nThanks,\nExpense Tracker`
+      Hello ${name},\n\nYou recently requested to reset your password for your account. Click the link below to reset it:\n\nhttp://51.21.2.190:3000/user/resetpassword/${uuid}\n\nIf you did not request a password reset, please ignore this email or reply to let us know. This link is only valid once.\n\nThanks,\nExpense Tracker`
     });
     await ForgotPasswordReq.create({id:uuid,userId:id,isActive:true});
     await transact.commit();
