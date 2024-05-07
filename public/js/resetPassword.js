@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
       try {
         const response = await axios.post(
-          `http://51.21.2.190:3000/user/resetpassword/${uuid}`,
+          `http://13.48.178.186:3000/user/resetpassword/${uuid}`,
           { password }
         );
         alert(response.data.message);

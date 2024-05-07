@@ -45,7 +45,7 @@ async function addItem(e) {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.post(
-        "http://51.21.2.190:3000/expenses/addExpense",
+        "http://13.48.178.186:3000/expenses/addExpense",
         obj,
         {
           headers: { "Authorization": token },
@@ -88,7 +88,7 @@ async function deleteItem(e) {
       const token = localStorage.getItem("token");
       try {
         const response = await axios.get(
-          "http://51.21.2.190:3000/expenses/getExpenses",
+          "http://13.48.178.186:3000/expenses/getExpenses",
           {
             headers: { "Authorization": token },
           }
@@ -98,7 +98,7 @@ async function deleteItem(e) {
             let deletedUser = response.data.response[i].description;
             try {
               await axios.delete(
-                "http://51.21.2.190:3000/expenses/deleteExpense/" +
+                "http://13.48.178.186:3000/expenses/deleteExpense/" +
                   response.data.response[i].id
               );
               expenseList.removeChild(e.target.parentElement);
@@ -133,7 +133,7 @@ async function premiumHandler(e) {
   const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
-      "http://51.21.2.190:3000/premium/buyPremium",
+      "http://13.48.178.186:3000/premium/buyPremium",
       {
         headers: { "Authorization": token },
       }
@@ -144,7 +144,7 @@ async function premiumHandler(e) {
       handler: async (res) => {
         try {
           const response = await axios.post(
-            "http://51.21.2.190:3000/premium/updateStatus",
+            "http://13.48.178.186:3000/premium/updateStatus",
             {
               "order_id": options.order_id,
               "payment_id": res.razorpay_payment_id,
@@ -165,7 +165,7 @@ async function premiumHandler(e) {
         } catch (err) {
           alert("Something went wrong. Please retry!");
           const response = await axios.post(
-            "http://51.21.2.190:3000/premium/updateStatus",
+            "http://13.48.178.186:3000/premium/updateStatus",
             {
               "order_id": options.order_id,
               "payment_id": res.razorpay_payment_id,
@@ -182,7 +182,7 @@ async function premiumHandler(e) {
     razorpayUI.on("payment.failed", async (res) => {
       try {
         const response = await axios.post(
-          "http://51.21.2.190:3000/premium/updateStatus",
+          "http://13.48.178.186:3000/premium/updateStatus",
           {
             "order_id": options.order_id,
             "payment_id": res.razorpay_payment_id,
@@ -209,7 +209,7 @@ async function showLeaderboard(e) {
   document.querySelector("#leaderboardBtn").textContent = "UPDATE LEADERBOARD";
   try {
     const response = await axios.get(
-      "http://51.21.2.190:3000/premium/showLeaderboard",
+      "http://13.48.178.186:3000/premium/showLeaderboard",
       {
         headers: { "Authorization": token },
       }
@@ -253,7 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchExpenses();
     fetchIncome();
     generatePagination(
-      `http://51.21.2.190:3000/expenses/getExpenses`,
+      `http://13.48.178.186:3000/expenses/getExpenses`,
       expPagination,
       expCurrentPage,
       fetch
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function refreshDownloads() {
     renderDownloads(downloadsCurrentPage);
     generatePagination(
-      `http://51.21.2.190:3000/premium/getDownloads`,
+      `http://13.48.178.186:3000/premium/getDownloads`,
       pagination,
       downloadsCurrentPage,
       renderDownloads
@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://51.21.2.190:3000/expenses/getExpenses`,
+        `http://13.48.178.186:3000/expenses/getExpenses`,
         {
           headers: { "Authorization": token },
         }
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://51.21.2.190:3000/expenses/getExpenses`,
+        `http://13.48.178.186:3000/expenses/getExpenses`,
         {
           headers: { "Authorization": token },
         }
@@ -402,7 +402,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   renderDownloads(downloadsCurrentPage);
   generatePagination(
-    `http://51.21.2.190:3000/premium/getDownloads`,
+    `http://13.48.178.186:3000/premium/getDownloads`,
     pagination,
     downloadsCurrentPage,
     renderDownloads
@@ -411,7 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function renderDownloads(page) {
     downloadsBody.innerHTML = "";
     const data = await fetchPageData(
-      `http://51.21.2.190:3000/premium/getDownloads?page=${page}&pageSize=${localStorage.getItem(
+      `http://13.48.178.186:3000/premium/getDownloads?page=${page}&pageSize=${localStorage.getItem(
         "dwnRows"
       )}`,
       page
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
-        `http://51.21.2.190:3000/expenses/getExpenses?page=${expCurrentPage}&pageSize=${localStorage.getItem(
+        `http://13.48.178.186:3000/expenses/getExpenses?page=${expCurrentPage}&pageSize=${localStorage.getItem(
           "expRows"
         )}`,
         {
@@ -470,7 +470,7 @@ document
 async function downloadExpenses() {
   const token = localStorage.getItem("token");
   const response = await axios.get(
-    "http://51.21.2.190:3000/premium/downloadExpenses",
+    "http://13.48.178.186:3000/premium/downloadExpenses",
     {
       headers: { "Authorization": token },
     }
