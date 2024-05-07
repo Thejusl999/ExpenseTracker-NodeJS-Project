@@ -5,8 +5,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 // const helmet = require("helmet");
-const compression = require("compression");
-const morgan = require("morgan");
+// const compression = require("compression");
+// const morgan = require("morgan");
 
 const sequelize = require("./util/database");
 const User = require("./models/User");
@@ -15,10 +15,10 @@ const Order = require("./models/Order");
 const ForgotPasswordReq = require("./models/ForgotPasswordReq");
 const Download = require("./models/Download");
 
-const accessLogStream = fs.createWriteStream(
+/* const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "access.log"),
   { flags: "a" }
-);
+); */
 
 const app = express();
 // app.use(
@@ -42,8 +42,8 @@ const app = express();
 //     },
 //   })
 // );
-app.use(compression());
-app.use(morgan("combined", { stream: accessLogStream }));
+// app.use(compression());
+// app.use(morgan("combined", { stream: accessLogStream }));
 app.use(cors());
 app.use(bodyParser.json({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
